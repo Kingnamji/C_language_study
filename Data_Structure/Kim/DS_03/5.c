@@ -9,8 +9,8 @@ void printPolynomial( int start, int finish );
 
 typedef struct 
 {
-    int coef;
-    int exp;
+    int coef; // 계수
+    int exp; // 지수
 }term;
  
 term terms[MAX_TERMS];

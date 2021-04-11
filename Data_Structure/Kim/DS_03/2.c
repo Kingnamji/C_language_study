@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MALLOC(P, SIZE)  \
-	if(!((p) = malloc(SIZE))) { \
-		fprintf_s(stderr, "not allocated\n"); \
-		exit(EXIT_FAILURE); \
-	}
 
+#define MALLOC(p,s)\
+	if (!((p) = malloc(s))){\
+		exit(1);\
+	}
 
 int** make2dArray(int, int);
 
@@ -25,6 +24,12 @@ int main()
 		}
 		printf("\n");
 	}
+
+	for (i = 0; i < rows; i++)
+	{
+		free(ipp[i]);
+	}
+	free(ipp);
 
 	return;
 }

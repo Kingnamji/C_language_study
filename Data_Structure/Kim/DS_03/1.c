@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MALLOC(P, SIZE)  \
-	if(!((p) = malloc(SIZE))) { \
-		fprintf_s(stderr, "not allocated\n"); \
-		exit(EXIT_FAILURE); \
-	}
 int* make1dArray(int);
+
+#define MALLOC(p,s) \
+	if (!(p = malloc(s))){\
+		exit(1);\
+	}
 
 int main()
 {
@@ -21,8 +21,10 @@ int main()
 		printf("ipp[%2d] =%2d ", i, ipp[i]);
 		if ((i % 5) == 4)
 			printf("\n");
-
 		}
+
+	free(ipp);
+
 	return 0;
 }
 
