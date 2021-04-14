@@ -1,101 +1,95 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MALLOC(p, s) \
-	if( !( (p) = malloc( s ) ) ){	\
-		fprintf(stderr, "Insufficient memory");\
-		exit(EXIT_FAILURE);\
+#define MALLOC(p,s)\
+	if( !((p) = malloc(s)) ){\
+		exit(1);\
 	}
 
-typedef struct node *treePointer;
-typedef struct node
-{
-	char data;		
+typedef struct node* treePointer;
+typedef struct node {
+	char data;
 	treePointer leftChild, rightChild;
 }node;
 treePointer root = NULL;
 
-treePointer createNode( char data );
-treePointer createBinTree();
 void inorder(treePointer ptr);
 void preorder(treePointer ptr);
 void postorder(treePointer ptr);
+treePointer createNode(char data);
 
-int main(void)
-{
+int main(void) {
+	
+	treePointer nodeA, nodeB, nodeC, nodeD, nodeE;
+
 	printf("creating a binary tree\n\n");
-	root = createBinTree();
+
+	nodeA = createNode('A');
+	nodeB = createNode('B');
+	nodeC = createNode('C');
+	nodeD = createNode('D');
+	nodeE = createNode('E');
+	
+	nodeA->leftChild = nodeB;
+	nodeA->rightChild = nodeC;
+	nodeB->leftChild = nodeD;
+	nodeB->rightChild = nodeE;
+
+	root = nodeA;
 
 	printf("three binary tree traversals\n");
-	printf("%-20s : \n", "inorder traversal");
-	inorder(root); 	printf("\n");
-
-	printf("%-20s : \n","preorder traversal");
-	preorder(root);	printf("\n");
-
-	printf("%-20s : \n","postorder traversal");
-	postorder(root);	printf("\n\n");
+	printf("inorder traversal    :\n");
+	inorder(root);
+	printf("\n");
+	printf("preorder traversal    :\n");
+	preorder(root);
+	printf("\n");
+	printf("postorder traversal    :\n");
+	postorder(root);
+	printf("\n");
+	
+	free(nodeA);
+	free(nodeB);
+	free(nodeC);
+	free(nodeD);
+	free(nodeE);
 
 	return 0;
 }
 
-treePointer createNode( char data )
+treePointer createNode(char data)
 {
-	treePointer pNode;
+	treePointer ptr;
 
-	MALLOC(pNode, sizeof(*pNode));
-	pNode->data = data;
-	pNode->leftChild = NULL;
-	pNode->rightChild = NULL;
-	
-	return pNode;
+	MALLOC(ptr, sizeof(*ptr));
+	ptr->data = data;
+	ptr->leftChild = NULL;
+	ptr->rightChild = NULL;
+
+	return ptr;
 }
 
-
-treePointer createBinTree()
-{
-	treePointer pNodeA, pNodeB, pNodeC, pNodeD, pNodeE;
-
-	pNodeA = createNode('A');
-	pNodeB = createNode('B');
-	pNodeC = createNode('C');
-	pNodeD = createNode('D');
-	pNodeE = createNode('E');
-
-	pNodeA->leftChild = pNodeB;
-	pNodeA->rightChild = pNodeC;
-	pNodeB->leftChild = pNodeD;
-	pNodeB->rightChild = pNodeE;	
-
-	return pNodeA;
-}
-
-void inorder(treePointer ptr)
-{ 
-	if(ptr)
-	{
+void inorder(treePointer ptr) {
+	if (ptr) {
 		inorder(ptr->leftChild);
-		printf("(%p : %p  %c  %p) \n",ptr,  ptr->leftChild, ptr->data, ptr->rightChild);
+		printf("(%p : %p  %c %p)\n", ptr, ptr->leftChild, ptr->data, ptr->rightChild);
 		inorder(ptr->rightChild);
 	}
 }
 
-void preorder(treePointer ptr)
-{ 
-	if(ptr)
-	{
-		printf("(%p : %p  %c  %p) \n", ptr, ptr->leftChild, ptr->data, ptr->rightChild);
+void preorder(treePointer ptr) {
+	if (ptr) {
+		printf("(%p : %p  %c %p)\n", ptr, ptr->leftChild, ptr->data, ptr->rightChild);
 		preorder(ptr->leftChild);
 		preorder(ptr->rightChild);
 	}
 }
 
-void postorder(treePointer ptr)
-{ 
-	if(ptr)
-	{
+void postorder(treePointer ptr) {
+	if (ptr) {
 		postorder(ptr->leftChild);
 		postorder(ptr->rightChild);
-		printf("(%p : %p  %c  %p) \n", ptr, ptr->leftChild, ptr->data, ptr->rightChild);
+		printf("(%p : %p  %c %p)\n", ptr, ptr->leftChild, ptr->data, ptr->rightChild);
 	}
 }
+
