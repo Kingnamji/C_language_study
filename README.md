@@ -22,3 +22,13 @@
 #### 윤성우의 열혈 자료구조 (교재)
 - 자료구조에 대한 기본적인 이해 및 알고리즘의 성능분석 방법
 #### 김ㅇㅇ 교수님 강의 (전공 공부)
+- Pointers and Dynamic Memory Allocation
+- Data Abstraction
+- Binary Search
+- Performance Analysis
+- Arrays and Structures
+- Polynomials
+- Sparse Matrix
+- Stacks And Queues
+- Mazing Problem
+- Linked List
