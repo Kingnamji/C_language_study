@@ -7,7 +7,6 @@
 
 #define MAX_LEN 81
 #define MAX_STACK_SIZE 100
-#define MAX_QUEUE_SIZE 100
 
 typedef struct node* treePointer;
 typedef struct node
@@ -25,22 +24,12 @@ treePointer pop();
 treePointer stackEmpty();
 void push(treePointer item);
 void stackFull();
-void addq(treePointer item);
-void queueFull();
-treePointer queueEmpty();
-treePointer deleteq();
-
-void iterinorder(treePointer node);
-void levelOrder(treePointer ptr);
+void iterPreorder(treePointer node);
+void iterPostorder(treePointer node);
 
 treePointer stack[MAX_STACK_SIZE];
-treePointer queue[MAX_QUEUE_SIZE];
-
-int front=0, rear=0;
 int cnt = 0;
-int top = -1, i = -1;
-
-char order[MAX_LEN];
+int top = -1;
 char expr[MAX_LEN];
 
 int main(void) {
@@ -51,28 +40,23 @@ int main(void) {
 	if (fp == NULL)
 		exit(1);
 
-	printf("The length of input string should be less than %d\n", MAX_LEN-1);
-	printf("input string (postfix expression) from input.txt : ");
+	printf("The length of input string should be less than %d\n", MAX_LEN - 1);
+	printf("input string (postfix expression) : ");
 	fgets(expr, MAX_LEN, fp);
 	printf("%s\n", expr);
 
 	root = create();
 	printf("\n");
 
-	printf("iterative inorder traversal      : ");
-	iterinorder(root);
+	printf("iterative preorder traversal  : ");
+	iterPreorder(root);
 	printf("\n");
-
-	printf("스택에 들어가는 데이터의 순서    : ");
-	for (int j = 0; j < i; j++) {
-		printf("%c ", order[j]);
-	}
-	printf("\n\n");
-
-	printf("level order traversal            : ");
-	levelOrder(root);
+	
+	root = create();
+	cnt = 0;
+	printf("iterative preorder traversal  : ");
+	iterPostorder(root);
 	printf("\n");
-
 
 	fclose(fp);
 
@@ -132,6 +116,64 @@ precedence getToken(char* symbol, int* n)
 	}
 }
 
+void iterPreorder(treePointer node)
+{
+	top = -1;
+
+	for (;;)
+	{
+		for (; node; node = node->leftChild)
+		{
+			push(node);
+			cnt++;
+			printf("%c", node->data);
+		}
+		node = pop();
+
+		if (!node) break;
+		node = node->rightChild;
+	}
+	printf("\npush_cnt = %d\n", cnt);
+}
+void iterPostorder(treePointer root)
+
+{
+	if (root == NULL)
+		return;
+
+	do
+	{
+		while (root)
+		{
+			if (root->rightChild)
+			{
+				push(root->rightChild);
+				cnt++;
+			}
+			push(root);
+			cnt++;
+
+			root = root->leftChild;
+		}
+
+		root = pop();
+
+		if ( root->rightChild && stack[top] == root->rightChild)
+		{
+			pop();
+			push(root);
+			cnt += 2;
+			root = root->rightChild;
+		}
+		else
+		{
+			printf("%c", root->data);
+			root = NULL;
+		}
+	} while (top != -1);
+
+	printf("\npush_cnt = %d", cnt);
+}
 
 treePointer stackEmpty()
 {
@@ -151,7 +193,6 @@ void push(treePointer item)
 {
 	if (top >= MAX_STACK_SIZE - 1)
 		stackFull();
-	
 	stack[++top] = item;
 }
 
@@ -159,71 +200,4 @@ void stackFull()
 {
 	printf("Stack is full\n");
 	exit(1);
-}
-
-void addq(treePointer item)
-{ 
-	rear = (rear + 1) % MAX_QUEUE_SIZE;
-	if (front == rear)
-		queueFull(); 
-	queue[rear] = item;
-}
-
-void queueFull()
-{
-	fprintf(stderr, "queue is full\n");
-	exit(1);
-}
-
-treePointer deleteq()
-{ 
-	if (front == rear)
-		return queueEmpty(); 
-	front = (front + 1) % MAX_QUEUE_SIZE;
-	return queue[front];
-}
-
-treePointer queueEmpty()
-{
-	treePointer item;
-	item = NULL;  
-	return item;
-}
-
-
-void iterinorder(treePointer node)
-{
-	order[i++] = node->data;
-	for (;;) {
-		for (; node; node = node->leftChild) {
-			push(node);			
-			order[i++] = node->data;
-		}
-		node = pop();
-		if (!node)
-			break;
-		printf("%c ", node->data);
-		node = node->rightChild;
-	}
-}
-
-void levelOrder(treePointer ptr)
-{
-	if (!ptr)
-		return;
-
-	addq(ptr);
-
-	for (;;) {
-		ptr = deleteq();
-		if (ptr) {
-			printf("%c ", ptr->data);
-			if (ptr->leftChild)
-				addq(ptr->leftChild);
-			if (ptr->rightChild)
-				addq(ptr->rightChild);
-		}
-		else 
-			break;
-	}
 }

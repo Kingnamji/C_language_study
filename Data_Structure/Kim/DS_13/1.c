@@ -1,136 +1,127 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MALLOC(p, s) \
-	if( !( (p) = malloc( s ) ) ){	\
-		fprintf(stderr, "Insufficient memory");\
-		exit(EXIT_FAILURE);\
+#define MALLOC(p,s)\
+	if (!((p) = malloc(s))) {\
+		exit(1);\
 	}
+
+#define MAX_LEN 81
 #define MAX_STACK_SIZE 100
 
-// tree node & header
-typedef struct node *treePointer;
+typedef struct node* treePointer;
 typedef struct node
 {
-	char data;		// operator or operand in char type
+	char data;	
 	treePointer leftChild, rightChild;
 }node;
 treePointer root = NULL;
 
-// stack
-treePointer stack[MAX_STACK_SIZE];
-int top = -1;
-void push(treePointer item);
-void stackFull();
+typedef enum { lparen, rparen, plus, minus, times, divide, mod, eos, operand }precedence;
+
+precedence getToken(char* symbol, int* n);
+treePointer create();
 treePointer pop();
 treePointer stackEmpty();
-
-// postfix expression 
-char expr[81];
-int cnt;
-
-// binary tree of an arithmetic expression
-typedef enum { lparen, rparen, plus, minus, times, divide, 
-							mod, eos, operand } precedence;
-precedence getToken(char *symbol, int *n);
-treePointer createBinTree(void);
-
-// binary tree traversals
+void push(treePointer item);
+void stackFull();
 void inorder(treePointer ptr);
 void preorder(treePointer ptr);
 void postorder(treePointer ptr);
 
-int main(void)
-{
-	FILE *fp;	
+treePointer stack[MAX_STACK_SIZE];
+int top = -1;
+char expr[MAX_LEN];
 
-	if(fopen_s(&fp, "input.txt", "r") )
-	{
-		fprintf(stderr, "cannot open the file");
-		exit(EXIT_FAILURE);
-	}
-	
-	printf("the length of input string should be less than 80\n");
-	fgets(expr, 80, fp);
-	printf("input string (postfix expression) : %s\n", expr);
+int main(void) {
 
-	printf("creating its binary tree\n\n");
-	root = createBinTree();
+	FILE* fp;
 
-	printf("%-20s : ", "inorder traversal");
-	cnt = 0;
-	inorder(root); 	printf("\n");
+	fopen_s(&fp, "input.txt", "r");
+	if (fp == NULL)
+		exit(1);
 
-	printf("%-20s : ","preorder traversal");
-	cnt = 0;
-	preorder(root);	printf("\n");
+	printf("The length of input string should be less than %d\n", MAX_LEN-1);
+	printf("input string (postfix expression) : ");
+	fgets(expr, MAX_LEN, fp);
+	printf("%s\n", expr);
 
-	printf("%-20s : ","postorder traversal");
-	cnt = 0;
-	postorder(root);	printf("\n");
+	root = create();
+	printf("\n");
+
+	printf("inorder traversal      : ");
+	inorder(root);
+	printf("\n");
+
+	printf("preorder traversal     : ");
+	preorder(root);
+	printf("\n");
+
+	printf("postorder traversal    : ");
+	postorder(root);
+	printf("\n");
+
+
+	fclose(fp);
 
 	return 0;
 }
 
-// create a binary tree from a postfix arithmetic expression
-treePointer createBinTree(void)
+treePointer create(void)
 {
 	treePointer pNode;
 	precedence token;
 	char symbol;
-	int n = 0; /* counter for the expression string */
+	int n = 0; 
+	
+	printf("creating its binary tree\n");
 	top = -1;
+
 	token = getToken(&symbol, &n);
-	while( token != eos )
+	while (token != eos)
 	{
-		if( token == operand )
+		if (token == operand)
 		{
-			// operand node
+			
 			MALLOC(pNode, sizeof(*pNode));
 			pNode->data = symbol;
 			pNode->leftChild = NULL;
 			pNode->rightChild = NULL;
-			
-			push(pNode); /* stack insert */
-		}
-		else{ 
-			// operator node
-			MALLOC(pNode, sizeof(*pNode));
-			pNode->data = symbol;			// operator
-			pNode->rightChild =  pop();	// link operand
-			pNode->leftChild = pop();		// link operand
 
 			push(pNode);
 		}
-		token = getToken( &symbol, &n);
+		else {
+			
+			MALLOC(pNode, sizeof(*pNode));
+			pNode->data = symbol;		
+			pNode->rightChild = pop();	
+			pNode->leftChild = pop();	
+
+			push(pNode);
+		}
+		token = getToken(&symbol, &n);
 	}
-	return pop(); /* return result, that is, root pointer */
+	return pop(); 
 }
 
-// Program 3.14: Function to get a token from the input string
-precedence getToken(char *symbol, int *n)
-{ /* get the next token, symbol is the character representation, 
-	whichis returned, the tokenis represented by its enumerated value, 
-	which is returned inthe function name */
-	*symbol = expr[ (*n)++ ];
-	switch ( *symbol) 
-	{
-			//case '('		: return lparen;
-			//case ')'		:  return rparen;
-			case '+'		: return plus;
-			case '-'		: return minus;
-			case '/'		: return divide;
-			case '*'		: return times;
-			case '%'	: return mod;
-			case '\0'	: return eos;
-			default		: return operand; /* no error checking, default is operand */
-	}
-}
 
-///////////////////// binary tree traversals //////////////////////////////
-void inorder(treePointer ptr)
+precedence getToken(char* symbol, int* n)
 { 
-	cnt++;
-	if(ptr)
+	*symbol = expr[(*n)++];
+	switch (*symbol)
+	{
+		case '+': return plus;
+		case '-': return minus;
+		case '/': return divide;
+		case '*': return times;
+		case '%': return mod;
+		case '\0': return eos;
+		default: return operand;
+	}
+}
+
+void inorder(treePointer ptr)
+{
+	if (ptr)
 	{
 		inorder(ptr->leftChild);
 		printf("%c", ptr->data);
@@ -139,9 +130,8 @@ void inorder(treePointer ptr)
 }
 
 void preorder(treePointer ptr)
-{ 
-	cnt++;
-	if(ptr)
+{
+	if (ptr)
 	{
 		printf("%c", ptr->data);
 		preorder(ptr->leftChild);
@@ -150,9 +140,8 @@ void preorder(treePointer ptr)
 }
 
 void postorder(treePointer ptr)
-{ 
-	cnt++;
-	if(ptr)
+{
+	if (ptr)
 	{
 		postorder(ptr->leftChild);
 		postorder(ptr->rightChild);
@@ -160,29 +149,29 @@ void postorder(treePointer ptr)
 	}
 }
 
-treePointer pop()
-{/* delete and return the top int from the stack */
-	if ( top == -1 )
-		return stackEmpty();	/* returns an error key */
-	return stack[top--];
-}
-
 treePointer stackEmpty()
 {
-	treePointer item;
-	item = NULL;  // error key value - null pointer
+	treePointer item = NULL;
 	return item;
 }
 
+treePointer pop()
+{
+	if (top == -1)
+		return stackEmpty();
+	return stack[top--];
+}
+
+
 void push(treePointer item)
-{/* add an item to the global stack */
-	if ( top >= MAX_STACK_SIZE-1 )
+{
+	if (top >= MAX_STACK_SIZE - 1)
 		stackFull();
 	stack[++top] = item;
 }
 
 void stackFull()
 {
-	fprintf(stderr, "stack is full, cannot add item\n");
-	exit(EXIT_FAILURE);
+	printf("Stack is full\n");
+	exit(1);
 }
