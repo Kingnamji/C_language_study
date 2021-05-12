@@ -1,154 +1,162 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#define FALSE 0
-#define TRUE 1
-#define MAX_SIZE 100
-#define MALLOC(p,s) ((p) = malloc(s))
-
-typedef struct queue *queuePointer;
-typedef struct queue
-{
-	int data;
-	queuePointer link;
-}Queue;
-
-queuePointer graph[MAX_SIZE] = { 0, };
-int visited[MAX_SIZE] = { 0, };
-queuePointer front, rear;
-
-void addq(int);
-int deleteq();
-queuePointer createL(int);
-void insertL(int, int);
-void bfs(int);
-void printL(queuePointer);
-
-int main()
-{
-	FILE *fp = fopen("input2.txt", "r");
-	int v, e;
-	int i, j;
-	int n1, n2;
-
-	visited[-1] = TRUE;
-
-	fscanf(fp, "%d %d", &v, &e);
-	for (i = 0; i<v; i++)
-		graph[i] = createL(-1);
-
-	for (i = 0; i<e; i++)
-	{
-		fscanf(fp, "%d %d", &n1, &n2);
-		insertL(n1, n2);
-		insertL(n2, n1);
+#define MALLOC(p,s)\
+	if( !( (p) = malloc(s) ) ){\
+		exit(1);\
 	}
 
-	printf("<<<<<<<<<< Adjacency queue >>>>>>>>>>\n");
-	for (i = 0; i<v; i++)
+#define TRUE 1
+#define FALSE 0
+#define MAX 100
+
+typedef struct queue* queuePointer;
+typedef struct queue
+{
+	int vertex;
+	queuePointer link;
+}queue;
+
+queuePointer front, rear;
+queuePointer graph[MAX] = { NULL };
+int visited[MAX] = { 0 };
+
+queuePointer create(int vertex);
+void addq(int);
+int deleteq();
+void insert(int n1, int n2);
+void bfs(int v);
+void printList(queuePointer p);
+
+int main(void)
+{
+	FILE* fp;
+	int i, j;
+	int n1, n2;
+	int v, e; // vertex, edge
+
+	visited[-1] = 1;
+
+	fopen_s(&fp, "input.txt", "r");
+
+	if (fp == NULL) {
+		exit(1);
+	}
+
+	fscanf_s(fp, "%d %d", &v, &e);
+	for (i = 0; i < v; i++)
+		graph[i] = create(-1);
+
+	for (i = 0; i < e; i++)
+	{
+		fscanf_s(fp, "%d %d", &n1, &n2);
+		insert(n1, n2);
+		insert(n2, n1);
+	}
+
+	printf("<<<<<<<<<< Adjacency List >>>>>>>>>>\n");
+	for (i = 0; i < v; i++)
 	{
 		printf("graph[%d] : ", i);
-		printL(graph[i]->link);
+		printList(graph[i]->link);
 		printf("\n");
 	}
 
 	printf("\n<<<<<<<<<< Breadth First Search >>>>>>>>>>\n");
-	for (i = 0; i<v; i++)
+	for (i = 0; i < v; i++)
 	{
 		printf("bfs<%d> : ", i);
 		bfs(i);
 		printf("\n");
 
-		for (j = 0; j<v; j++)
+		for (j = 0; j < v; j++)
 			visited[j] = 0;
 	}
+
+	fclose(fp);
 
 	return 0;
 }
 
-void addq(int data)
-{
+queuePointer create(int vertex) {
 	queuePointer temp;
+
 	MALLOC(temp, sizeof(*temp));
 
-	temp->data = data;
-	temp->link = NULL;
-
-	if (front)
-		rear->link = temp; 
-	else    
-		front = temp;   
-
-	rear = temp; 
-}
-
-int deleteq()
-{
-	queuePointer temp = front;
-	int deleted;  
-
-	if (!temp)
-		exit(EXIT_FAILURE);
-
-	deleted = front->data;
-	front = temp->link; 
-	free(temp); 
-
-	return deleted; 
-}
-
-queuePointer createL(int data)
-{
-	queuePointer temp;
-	MALLOC(temp, sizeof(*temp));
-
-	temp->data = data;
+	temp->vertex = vertex;
 	temp->link = NULL;
 
 	return temp;
 }
 
-void insertL(int n1, int n2)
+void addq(int vertex)
 {
-	queuePointer temp = createL(n2);
+	queuePointer temp;
+	MALLOC(temp, sizeof(*temp));
+
+	temp->vertex = vertex;
+	temp->link = NULL;
+
+	if (front)
+		rear->link = temp;
+	else
+		front = temp;
+
+	rear = temp;
+}
+
+int deleteq()
+{
+	queuePointer temp = front;
+	int delete_v;
+
+	if (!temp) // queue가 비었을 때 
+		exit(1);
+
+	delete_v = front->vertex;
+	front = temp->link;
+
+	free(temp);
+
+	return delete_v;
+}
+
+void insert(int n1, int n2) {
+	queuePointer temp = create(n2);
 
 	if (!graph[n1]->link)
-		graph[n1]->link = temp;   
+		graph[n1]->link = temp;
 	else
 	{
 		temp->link = graph[n1]->link;
-		graph[n1]->link = temp;  
+		graph[n1]->link = temp;
 	}
 }
 
-
 void bfs(int v)
 {
-	queuePointer temp;
+	queuePointer w;
 	front = rear = NULL;
 
-	visited[v] = TRUE;
 	printf("%5d", v);
-	addq(v);    
+	visited[v] = TRUE;
 
-	while (front)
-	{
-		v = deleteq();  
-
-		for (temp = graph[v]; temp; temp = temp->link) 
+	addq(v);
+	while (front) {
+		v = deleteq();
+		for (w = graph[v]; w; w = w->link)
 		{
-			if (!visited[temp->data])
-			{
-				printf("%5d", temp->data);
-				addq(temp->data);
-				visited[temp->data] = TRUE;
+			if (!visited[w->vertex]) {
+				printf("%5d", w->vertex);
+				addq(w->vertex);
+				visited[w->vertex] = TRUE;
 			}
 		}
 	}
 }
 
-void printL(queuePointer p)
+void printList(queuePointer p)
 {
 	for (; p; p = p->link)
-		printf("%5d", p->data);
+		printf("%5d", p->vertex);
 }
